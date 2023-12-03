@@ -1,26 +1,42 @@
 ﻿using System.Text.RegularExpressions;
+using System.IO;
+using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
 
 class Program
 {
     static void Main()
     {
-        List<string> inputStrings = new List<string>
-        {
-            "abcdef6ghi9",
-            "xyz767pqr4mno1",
-            "textNoN6umbers",
-            "multiple2numbers57inBetween"
-        };
+        List<string> inputStrings = ReadStringsFromFile("InputStrings.txt");
 
         int totalValue = TotalValueCalc(inputStrings);
-        Console.WriteLine($"this is the {totalValue}");
+
+        Console.WriteLine($"Total Value: {totalValue}");
+    }
+
+    static List<string> ReadStringsFromFile(string fileName)
+    {
+        List<string> inputStrings = new List<string>();
+
+        try
+        {
+            string[] lines = File.ReadAllLines(fileName);
+
+            inputStrings.AddRange(lines);
+        }
+        catch (IOException e)
+        {
+            Console.WriteLine($"Error reading file: {e.Message}");
+        }
+
+        return inputStrings;
     }
 
     static int TotalValueCalc(List<string> inputStrings)
     {
         int totalValue = 0;
 
-        Regex regex = new Regex(@"^\D*(\d).*?(\d)\D*$"); //sort out tomorrow
+        Regex regex = new Regex(@"\d");
 
         foreach (string inputString in inputStrings)
         {
@@ -28,6 +44,8 @@ class Program
 
             if (matches.Count > 0)
             {
+                string convertedString = ConvertAlphabetNumbers(inputString);
+
                 int firstNumber = int.Parse(matches[0].Value);
                 int lastNumber = int.Parse(matches[matches.Count - 1].Value);
 
@@ -40,5 +58,30 @@ class Program
         }
         
         return totalValue;
+    }
+
+    static string ConvertAlphabetNumbers(string input)
+    {
+        Dictionary<string, char> alphabetNumberMap = new Dictionary<string, char>
+        {
+            {"one", '1'},
+            {"two", '2'},
+            {"three", '3'},
+            {"four", '4'},
+            {"five", '5'},
+            {"six", '6'},
+            {"seven", '7'},
+            {"eight", '8'},
+            {"nine", '9'}
+        };
+
+        string convertedString = input;
+        foreach (var entry in alphabetNumberMap)
+        {
+            string pattern = $@"\b{entry.Key}\b"; // Match whole words
+            input = Regex.Replace(input, pattern, entry.Value.ToString(), RegexOptions.IgnoreCase);
+        }
+
+        return input;
     }
 }
