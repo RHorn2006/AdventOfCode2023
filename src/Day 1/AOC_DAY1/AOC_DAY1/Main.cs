@@ -78,8 +78,16 @@ class Program
         string convertedString = input;
         foreach (var entry in alphabetNumberMap)
         {
-            string pattern = $@"\b{entry.Key}\b"; // Match whole words
-            input = Regex.Replace(input, pattern, entry.Value.ToString(), RegexOptions.IgnoreCase);
+            string word = entry.Key;
+            char replacementWord = entry.Value;
+
+            int index = 0;
+
+            while ((index = convertedString.IndexOf(word, index, StringComparison.OrdinalIgnoreCase)) != -1)
+            {
+                convertedString = convertedString.Substring(0, index) + replacementWord + convertedString.Substring(index + word.Length);
+                index += 1;
+            }
         }
 
         return input;
